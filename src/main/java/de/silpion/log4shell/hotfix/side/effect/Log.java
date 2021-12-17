@@ -66,4 +66,12 @@ public class Log {
             throw new RuntimeException("Unexpected reflection exception: " + e, e);
         }
     }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public String getString() {
+        return (String)gadget[0];
+    }
 }
