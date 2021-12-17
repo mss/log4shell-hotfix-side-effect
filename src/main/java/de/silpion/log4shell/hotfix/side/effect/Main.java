@@ -3,6 +3,7 @@ package de.silpion.log4shell.hotfix.side.effect;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
 
 public class Main implements Runnable {
@@ -19,6 +20,8 @@ public class Main implements Runnable {
         final String[] args
     ) {
         this.args = args;
+
+        version();
     }
 
     @Override
@@ -39,6 +42,28 @@ public class Main implements Runnable {
         LOG.info("Triggering {}", description);
         LOG.info("Trigger: " + (args.length > arg ? args[arg] : gadget));
         LOG.info("That took {}ms", System.currentTimeMillis() - ts);
+    }
+
+    private void version() {
+        final Class core = Core.class;
+        final Package p = core.getPackage();
+
+        boolean patched = false;
+        try {
+            core.getClassLoader().loadClass(
+                p.getName() + ".lookup.JndiLookup"
+            );
+        }
+        catch (ClassNotFoundException e) {
+            patched = true;
+        }
+
+        LOG.info("Using {} {} (patched: {})",
+            p.getImplementationTitle(),
+            p.getImplementationVersion(),
+            patched
+        );
+
     }
 
     public static void main(
