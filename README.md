@@ -10,7 +10,7 @@ Result: It looks like no exception is bubbling up.
 To test this execute the following commands:
 ```
 ./gradlew clean installDist
-./build/install/log4shell-hotfix-side-effect/bin/log4shell-hotfix-side-effect
+env JAVA_OPTS=-Xmx64M ./build/install/log4shell-hotfix-side-effect/bin/log4shell-hotfix-side-effect
 ```
 
 It will log two messages and there should be no exceptions.

