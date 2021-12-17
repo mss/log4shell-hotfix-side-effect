@@ -13,7 +13,7 @@ To test this execute the following commands:
 env JAVA_OPTS=-Xmx64M ./build/install/log4shell-hotfix-side-effect/bin/log4shell-hotfix-side-effect
 ```
 
-It will log two messages and there should be no exceptions.
+It will log a bunch of messages and timings and there should be no exceptions.
 
 If the log4j jar file is not patched properly there should be a measurable
 delay between the messages (or you might even get an RCE, YMMV).

